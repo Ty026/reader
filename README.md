@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+这本书《百亿酒业进化论》适合以下几类读者：
 
-## Getting Started
+### 1. 企业管理者和决策者
 
-First, run the development server:
+- **年龄**: 35-55岁
+- **职业背景**: 白酒行业及相关产业链的企业高管、中高层管理者、董事长、总经理等，也包括其他行业对企业管理和发展有兴趣的领导者。
+- **动机**: 希望借鉴今世缘的成功经验，了解如何通过战略规划、品牌建设和组织变革实现企业的高质量发展。
+- **特点**: 具备一定的管理经验和战略思维，对企业成长和发展具有高度的责任感和使命感。
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 2. 白酒行业从业者
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **年龄**: 25-45岁
+- **职业背景**: 白酒生产、销售、营销、研发、品牌推广等各个环节的从业人员，包括经销商、渠道经理、品牌经理、营销策划人员等。
+- **动机**: 希望了解白酒行业的发展趋势，学习今世缘在品牌、营销、渠道等方面的创新做法，提升自身业务能力。
+- **特点**: 对白酒行业充满热情和兴趣，具备一定的行业知识和实践经验。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. 商业咨询师和研究人员
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **年龄**: 30-50岁
+- **职业背景**: 战略咨询师、管理咨询师、行业分析师、大学教师、研究机构的研究人员等。
+- **动机**: 希望通过案例研究，深入了解中国白酒行业的运作模式和发展趋势，提炼出有价值的商业模式、战略理论和管理方法。
+- **特点**: 具备扎实的理论基础和研究能力，对商业模式和战略管理有深刻的理解。
 
-## Learn More
+### 4. 对白酒文化和消费品营销有兴趣的博硕研究生及爱好者
 
-To learn more about Next.js, take a look at the following resources:
+- **年龄**: 22-30岁
+- **职业背景**: 商业、管理、经济、文化等专业的在校学生或刚刚毕业的年轻从业者，以及对消费品营销有兴趣的爱好者。
+- **动机**: 希望通过此书了解中国白酒行业的独特之处，学习消费品营销的理论和实践，为未来的职业发展奠定基础。
+- **特点**: 对新事物和新理念充满好奇，具备一定的理论基础和学习能力。
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 共同特点
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **兴趣**: 对企业成长、品牌建设、战略管理、数字化转型和中国传统文化有着浓厚的兴趣。
+- **需求**: 希望通过此书学习行业知识和案例分析，汲取经验和启发，并转化为自身企业的战略指南或职业发展的灵感。
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+这本书不仅为这些读者提供了有价值的知识和经验，也为他们在未来的发展道路上提供了灵感和启示。

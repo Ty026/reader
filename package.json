@@ -3,26 +3,48 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.1.1",
+    "@types/js-yaml": "^4.0.9",
+    "@xenova/transformers": "^2.17.2",
+    "ajv": "^8.17.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "fast-json-patch": "^3.1.1",
+    "gpt-tokenizer": "^2.8.1",
+    "js-yaml": "^4.1.0",
+    "lodash": "^4.17.21",
+    "lucide-react": "^0.468.0",
+    "nanoid": "^5.0.9",
+    "neo4j-driver": "^5.27.0",
+    "next": "15.1.1",
+    "openai": "^4.77.0",
+    "pg": "^8.13.1",
+    "pgvector": "^0.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "next": "15.1.1"
+    "swr": "^2.2.5",
+    "tailwind-merge": "^2.5.5",
+    "tailwindcss-animate": "^1.0.7",
+    "throttleit": "^2.1.0"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
+    "@types/lodash": "^4.17.13",
     "@types/node": "^20",
+    "@types/pg": "^8.11.10",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
     "eslint": "^9",
     "eslint-config-next": "15.1.1",
-    "@eslint/eslintrc": "^3"
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
   },
   "packageManager": "pnpm@9.12.1+sha512.e5a7e52a4183a02d5931057f7a0dbff9d5e9ce3161e33fa68ae392125b79282a8a8a470a51dfc8a0ed86221442eb2fb57019b0990ed24fab519bf0e1bc5ccfc4"
 }
