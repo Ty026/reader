@@ -9,7 +9,6 @@ export default function Home() {
       streamProtocol: "data",
     });
 
-  console.log(messages);
   // const handleSubmit = async () => {
 
   // const res = await fetch("/api/chat", {
@@ -32,7 +31,6 @@ export default function Home() {
   return (
     <div>
       {messages.map((item) => {
-        console.log(item);
         return (
           <div key={item.id}>
             <div className="border" />

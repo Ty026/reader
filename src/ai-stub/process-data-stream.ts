@@ -41,7 +41,8 @@ export async function processDataStream({
 }: ProcessDataStreamOptions) {
   const result = fromSSEResponse(stream);
   for await (const chunk of result) {
-    onTextPart?.((chunk as any).data.content);
+    const part = (chunk as any).data.content;
+    onTextPart?.(part);
   }
   onFinishMessagePart?.({ finishReason: "stop" });
 }

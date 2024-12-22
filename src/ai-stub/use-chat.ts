@@ -45,13 +45,16 @@ const processResponseStream = async (
         ...(annotations !== undefined && { annotations }),
       }));
 
+  const query = chatRequest.messages[chatRequest.messages.length - 1].content;
+
   const existingData = existingDataRef.current;
 
   return await callChatApi({
     api,
     body: {
-      messages: constructedMessagesPayload,
-      data: chatRequest.data,
+      // messages: constructedMessagesPayload,
+      query: query,
+      // data: chatRequest.data,
       ...extraMetadataRef.current.body,
       ...chatRequest.body,
     },
@@ -160,8 +163,7 @@ export function useChat({
   }, [credentials, headers, body]);
 
   const triggerRequest = React.useCallback(
-    async (chatRequest: ChatRequest) => {
-      const userInput = chatRequest.messages[chatRequest.messages.length - 1];
+    async (chatRequest: ChatRequest, input: string) => {
       const messageCount = messagesRef.current.length;
       try {
         mutateLoading(true);
@@ -201,16 +203,16 @@ export function useChat({
         mutateLoading(false);
       }
       // auto-submit when all tool calls in the last assistant message have results
-      const messages = messagesRef.current;
-      const lastMessage = messages[messages.length - 1];
-      if (
-        messages.length > messageCount &&
-        lastMessage != null &&
-        maxSteps > 1 &&
-        countTrailingAssistantMessages(messages) < maxSteps
-      ) {
-        await triggerRequest({ messages });
-      }
+      // const messages = messagesRef.current;
+      // const lastMessage = messages[messages.length - 1];
+      // if (
+      //   messages.length > messageCount &&
+      //   lastMessage != null &&
+      //   maxSteps > 1 &&
+      //   countTrailingAssistantMessages(messages) < maxSteps
+      // ) {
+      //   await triggerRequest({ messages, input });
+      // }
     },
     [
       mutate,
@@ -338,7 +340,7 @@ export function useChat({
         data: options.data,
       };
 
-      triggerRequest(chatRequest);
+      triggerRequest(chatRequest, input);
       setInput("");
     },
     [input, generateId, triggerRequest],

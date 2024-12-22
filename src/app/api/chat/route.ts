@@ -1,4 +1,6 @@
 import { advanceQuery } from "@/acorn/query/advance-query";
+import { formatSSEChunk, MessageManager } from "./messager";
+import { generateId } from "@/ai-stub/generate-id";
 
 function iteratorToStream(iterator: any) {
   return new ReadableStream({
@@ -16,19 +18,35 @@ function iteratorToStream(iterator: any) {
 const encoder = new TextEncoder();
 
 async function* makeCompletion(query: string) {
+  // const messager = new MessageManager(generateId(), "001", "text");
   const results = await advanceQuery(query, "hybrid");
+  // const initChunk = messager.createInitSSEChunk();
+  // yield encoder.encode(formatSSEChunk(initChunk));
   for await (const r of results) {
-    const data = { content: r.delta };
     yield encoder.encode(
-      "event: delta\ndata: " + JSON.stringify(data) + "\n\n",
+      formatSSEChunk({
+        event: "delta",
+        data: {
+          content: r.delta,
+        } as any,
+      }),
     );
+    // const chunk = messager.updateText(r.delta);
+    // if (chunk) yield encoder.encode(formatSSEChunk(chunk));
   }
+
+  // const chunk = messager.updateMessage((msg) => {
+  //   msg.message.status = "finished_successfully";
+  //   msg.message.end_turn = true;
+  //   msg.message.metadata.message_type = null;
+  //   msg.message.metadata.is_complete = true;
+  // });
+  // if (chunk) yield encoder.encode(formatSSEChunk(chunk));
 }
 
 export async function POST(request: Request) {
-  const { messages } = await request.json();
-  const input = messages[messages.length - 1].content;
-  const iterator = makeCompletion(input);
+  const { query } = await request.json();
+  const iterator = makeCompletion(query);
   const stream = iteratorToStream(iterator);
   return new Response(stream, {
     headers: {
