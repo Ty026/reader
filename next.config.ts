@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
     };
     return config;
   },
+  devIndicators: {
+    buildActivity: true,
+    appIsrStatus: true,
+    buildActivityPosition: "bottom-right",
+  },
 };
 
 export default nextConfig;
