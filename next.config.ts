@@ -10,8 +10,8 @@ const nextConfig: NextConfig = {
     return config;
   },
   devIndicators: {
-    buildActivity: true,
-    appIsrStatus: true,
+    buildActivity: false,
+    appIsrStatus: false,
     buildActivityPosition: "bottom-right",
   },
 };

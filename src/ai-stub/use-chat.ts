@@ -247,7 +247,7 @@ export function useChat({
         id: message.id ?? generateId(),
         createdAt: message.createdAt ?? new Date(),
       });
-      return triggerRequest({ messages, headers, body, data });
+      return triggerRequest({ messages, headers, body, data }, "");
     },
     [triggerRequest, generateId],
   );
@@ -259,13 +259,16 @@ export function useChat({
 
       // remove last assistant message and retry last user message
       const lastMessage = messages[messages.length - 1];
-      return triggerRequest({
-        messages:
-          lastMessage.role === "assistant" ? messages.slice(0, -1) : messages,
-        headers,
-        body,
-        data,
-      });
+      return triggerRequest(
+        {
+          messages:
+            lastMessage.role === "assistant" ? messages.slice(0, -1) : messages,
+          headers,
+          body,
+          data,
+        },
+        "",
+      );
     },
     [triggerRequest],
   );

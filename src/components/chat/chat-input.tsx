@@ -1,4 +1,3 @@
-"use client";
 import { LoaderCircle, Mic, MicOff } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -12,7 +11,15 @@ enum Status {
   kListening = "listening",
 }
 
-export const ChatInput = () => {
+export const ChatInput = ({
+  input,
+  onSubmit,
+  onInputChange,
+}: {
+  input: string;
+  onSubmit: (e: any) => void;
+  onInputChange: (e: any) => void;
+}) => {
   const [status, setStatus] = React.useState<Status>(Status.kIdle);
   const showLoading =
     status === Status.kLoading || status === Status.kGenerating;
@@ -35,14 +42,20 @@ export const ChatInput = () => {
             micEnabled && "bg-red-500 hover:bg-red-500",
           )}
           variant="outline"
-          // size="icon"
           aria-label="Add new item"
         >
           <Mic size={12} strokeWidth={2} aria-hidden="true" />
         </Button>
       </div>
       <div className="flex-1">
-        <Input className="border-none focus-visible:ring-0 ring-0 text-sm" />
+        <form onSubmit={onSubmit}>
+          <Input
+            placeholder="说点什么"
+            value={input}
+            onChange={onInputChange}
+            className="border-none focus-visible:ring-0 ring-0 text-sm"
+          />
+        </form>
       </div>
       <div>
         <Button variant="secondary" className="w-22">
@@ -74,4 +87,6 @@ interface UseChatInputResult {
 
 export const useChatInput = (
   onSendMessage: (message: string) => void,
-): UseChatInputResult => {};
+): UseChatInputResult => {
+  return {} as any;
+};
