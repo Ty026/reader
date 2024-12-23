@@ -10,10 +10,17 @@ export type IdGenerator = () => string;
 
 export type UseChatOptions = {
   api: string;
+  throttleWaitMs?: number;
   id?: string;
   initialInput?: string;
   generateId?: IdGenerator;
   initialMessages?: Message[];
+  headers?: Record<string, string> | Headers;
+  body?: object;
+  onResponse?: (response: Response) => void | Promise<void>;
+  onError?: (error: Error) => void;
+  onFinish?: () => void | Promise<void>;
+  onUpdate?: () => void;
 };
 
 export type ChatRequestOptions = {
@@ -30,6 +37,8 @@ export interface Message {
   content: string;
 
   role: "system" | "user" | "assistant" | "data";
+
+  status: "in_progress" | "finished_successfully";
 }
 
 export type ChatRequest = {
@@ -40,4 +49,5 @@ export type ChatRequest = {
   messages: Message[];
 
   data?: JSONValue;
+  query: string;
 };

@@ -9,15 +9,15 @@ export async function extractKeywordsFromQuery(query: string) {
   const startTime = performance.now();
 
   const prompt = keywordExtractPrompt.format({ query });
-  // const completion = new Completion({
-  //   model: "gpt-4o-mini",
-  //   apiKey: process.env.OPENAI_API_KEY,
-  //   // baseURL: "https://zz.hao-ai.cn/v1",
-  //   chatOptions: {
-  //     response_format: { type: "json_object" },
-  //   },
-  // });
-  const completion = getCompletion("json_object");
+  const completion = new Completion({
+    model: "gpt-4o-mini",
+    apiKey: process.env.OPENAI_API_KEY,
+    // baseURL: "https://zz.hao-ai.cn/v1",
+    chatOptions: {
+      response_format: { type: "json_object" },
+    },
+  });
+  // const completion = getCompletion("json_object");
 
   const response = await completion.chat({
     messages: [{ role: "user", content: prompt }],

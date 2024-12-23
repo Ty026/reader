@@ -1,7 +1,7 @@
 import { PromptTemplate } from "../prompt/prompt";
-export const defaultQAPrompt = "You are an helpful assistant";
+// export const defaultQAPrompt = "You are an helpful assistant";
 
-export const defaultQAPrompt1 = `你是一个友好的阅读助手，你帮助读者了解《百亿酒业进化论》这本书。
+export const defaultQAPrompt = `你是一个友好的阅读助手，你帮助读者了解《百亿酒业进化论》这本书。
 
 本书作者方明， 这本书以今世缘酒业的成长历程为案例，深入分析了其成功背后的六大关键要素，并将其总结为六维进化密码。以下是对全书核心内容的详细概览：
 

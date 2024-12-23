@@ -16,7 +16,7 @@ type Content<T extends ContentType> = T extends "text"
       ? { content_type: T; text: string }
       : never;
 
-type Pack<T extends ContentType> = {
+export type Pack<T extends ContentType> = {
   message: {
     id: string;
     author: { role: Role; name: string | null; metadata: object };

@@ -9,14 +9,23 @@ import type {
 } from "./types";
 
 import { generateId as generateIdFn } from "./generate-id";
-import useSWR from "swr";
+import useSWR, { KeyedMutator } from "swr";
+import { throttle } from "./throttle";
+import { callChatApi } from "./call-chat-api";
 
 export const useChat = ({
   api,
   id,
+  initialMessages,
+  throttleWaitMs,
+  headers,
+  body,
+  onResponse,
+  onError,
+  onFinish,
+  onUpdate,
   initialInput = "",
   generateId = generateIdFn,
-  initialMessages,
 }: UseChatOptions) => {
   const hookId = useId();
   const idKey = id ?? hookId;
@@ -28,6 +37,11 @@ export const useChat = ({
     null,
     { fallbackData: initialMessages ?? initialMessagesFallback },
   );
+  // keep the latest messages in a ref
+  const messagesRef = React.useRef<Message[]>(messages || []);
+  React.useEffect(() => {
+    messagesRef.current = messages || [];
+  }, [messages]);
 
   const { data: isLoading = false, mutate: mutateLoading } = useSWR<boolean>(
     [chatKey, "loading"],
@@ -50,21 +64,70 @@ export const useChat = ({
 
   const abortControllerRef = React.useRef<AbortController | null>(null);
 
-  const messagesRef = React.useRef<Message[]>(messages || []);
   const handleInputChange = (e: any) => {
     setInput(e.target.value);
   };
 
+  const extraMetadataRef = React.useRef({
+    headers,
+    body,
+  });
+  React.useEffect(() => {
+    extraMetadataRef.current = { headers, body };
+  }, [headers, body]);
+
   const triggerRequest = React.useCallback(
-    async (chatRequest: ChatRequest, input: string) => {
-      mutate(chatRequest.messages, false);
-      mutateLoading(true);
-      setError(undefined);
-      const abortController = new AbortController();
-      abortControllerRef.current = abortController;
-      await processResponseStream(api, chatRequest, streamDataRef, messagesRef);
+    async (chatRequest: ChatRequest) => {
+      try {
+        mutateLoading(true);
+        setError(undefined);
+        const abortController = new AbortController();
+        abortControllerRef.current = abortController;
+        await processResponseStream(
+          api,
+          chatRequest,
+          throttle(mutate, throttleWaitMs),
+          throttle(mutateStreamData, throttleWaitMs),
+          streamDataRef,
+          extraMetadataRef,
+          messagesRef,
+          abortControllerRef,
+
+          onResponse,
+          onFinish,
+          onUpdate,
+        );
+      } catch (err) {
+        // The user aborted the request
+        if ((err as any).name === "AbortError") {
+          abortControllerRef.current = null;
+          console.log("abort");
+          return null;
+        }
+
+        if (onError && err instanceof Error) onError(err);
+        setError(err as Error);
+      } finally {
+        mutateLoading(false);
+      }
     },
-    [],
+    [
+      mutate,
+      mutateLoading,
+      api,
+      extraMetadataRef,
+      onResponse,
+      // onFinish,
+      onError,
+      setError,
+      mutateStreamData,
+      streamDataRef,
+      messagesRef,
+      abortControllerRef,
+      generateId,
+      fetch,
+      throttleWaitMs,
+    ],
   );
 
   const handleSubmit = React.useCallback(
@@ -79,6 +142,7 @@ export const useChat = ({
         createdAt: new Date(),
         role: "user",
         content: input,
+        status: "finished_successfully",
       });
 
       const chatRequest: ChatRequest = {
@@ -86,14 +150,40 @@ export const useChat = ({
         headers: options.headers,
         body: options.body,
         data: options.data,
+        query: input,
       };
 
-      triggerRequest(chatRequest, input);
+      triggerRequest(chatRequest);
 
       setInput("");
     },
-    [input, generateId],
+    [input, generateId, triggerRequest],
   );
+
+  const setMessages = React.useCallback(
+    (messages: Message[] | ((messages: Message[]) => Message[])) => {
+      if (typeof messages === "function") {
+        messages = messages(messagesRef.current);
+      }
+      mutate(messages, false);
+      messagesRef.current = messages;
+    },
+    [mutate],
+  );
+
+  const stop = React.useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+      mutate(
+        [...messagesRef.current].map((item) => ({
+          ...item,
+          status: "finished_successfully",
+        })),
+        false,
+      );
+    }
+  }, []);
 
   return {
     input,
@@ -101,63 +191,57 @@ export const useChat = ({
     handleInputChange,
     handleSubmit,
     messages: messages || [],
+    setMessages,
     isLoading,
+    stop,
   };
 };
 
 async function processResponseStream(
   api: string,
   chatRequest: ChatRequest,
-  // mutate: KeyedMutator<Message[]>,
-  // mutateStreamData: KeyedMutator<JSONValue[] | undefined>,
+  mutate: KeyedMutator<Message[]>,
+  mutateStreamData: KeyedMutator<JSONValue[] | undefined>,
   existingDataRef: React.RefObject<JSONValue[] | undefined>,
-  // extraMetadataRef: React.RefObject<any>,
+  extraMetadataRef: React.RefObject<any>,
   messagesRef: React.RefObject<Message[]>,
-  // abortControllerRef: React.RefObject<AbortController | null>,
-  // generateId: IdGenerator,
-  // streamProtocol: UseChatOptions["streamProtocol"],
-  // onFinish: UseChatOptions["onFinish"],
-  // onResponse: ((response: Response) => void | Promise<void>) | undefined,
-  // sendExtraMessageFields: boolean | undefined,
-  // fetch: FetchFunction | undefined,
-  // keepLastMessageOnError: boolean,
+  abortControllerRef: React.RefObject<AbortController | null>,
+  onResponse: ((response: Response) => void | Promise<void>) | undefined,
+  onFinish: (() => void | Promise<void>) | undefined,
+  onMessageUpdate?: () => void,
 ) {
   // Do an optimistic update to the chat state to show the updated messages immediately:
   const previousMessages = messagesRef.current;
-  const query = chatRequest.messages[chatRequest.messages.length - 1].content;
+  mutate(chatRequest.messages, false);
+  onMessageUpdate?.();
 
   const existingData = existingDataRef.current;
 
-  // return await callChatApi({
-  //   api,
-  //   body: {
-  //     // messages: constructedMessagesPayload,
-  //     query: query,
-  //     // data: chatRequest.data,
-  //     ...extraMetadataRef.current.body,
-  //     ...chatRequest.body,
-  //   },
-  //   streamProtocol,
-  //   credentials: extraMetadataRef.current.credentials,
-  //   headers: {
-  //     ...extraMetadataRef.current.headers,
-  //     ...chatRequest.headers,
-  //   },
-  //   abortController: () => abortControllerRef.current,
-  //   restoreMessagesOnFailure() {
-  //     if (!keepLastMessageOnError) {
-  //       mutate(previousMessages, false);
-  //     }
-  //   },
-  //   onResponse,
-  //   onUpdate(merged, data) {
-  //     mutate([...chatRequest.messages, ...merged], false);
-  //     if (data?.length) {
-  //       mutateStreamData([...(existingData ?? []), ...data], false);
-  //     }
-  //   },
-  //   onFinish,
-  //   generateId,
-  //   fetch,
-  // });
+  return await callChatApi({
+    api,
+    body: {
+      query: chatRequest.query,
+      data: chatRequest.data,
+      ...extraMetadataRef.current.body,
+      ...chatRequest.body,
+    },
+    headers: {
+      ...extraMetadataRef.current.headers,
+      ...chatRequest.headers,
+    },
+    abortController: () => abortControllerRef.current,
+    restoreMessagesOnFailure() {
+      mutate(previousMessages, false);
+    },
+    onResponse,
+    onUpdate(merged, data) {
+      const newMessages = [...chatRequest.messages, ...merged];
+      mutate(newMessages, false);
+      if (data?.length) {
+        mutateStreamData([...(existingData ?? []), ...data], false);
+      }
+      onMessageUpdate?.();
+    },
+    onFinish,
+  });
 }

@@ -37,7 +37,7 @@ export async function addDoc(raw: string) {
       (c.metadata = {
         ...c.metadata,
         docId: docToAdd.id,
-        ...(metadata.source as any),
+        ...(metadata.source as unknown as Record<string, string>),
       }),
   );
 
