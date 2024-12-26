@@ -1,7 +1,7 @@
 import { applyPatch, compare, Operation } from "fast-json-patch";
 
 type Role = "assistant" | "user" | "tool";
-type MessageStatus = "in_progress" | "finished_successfully";
+type MessageStatus = "in_progress" | "finished_successfully" | "preprocessing";
 type ContentType = "text" | "code" | "execution_output";
 type Content<T extends ContentType> = T extends "text"
   ? { content_type: T; parts: string[] }
@@ -90,7 +90,7 @@ export class MessageManager<T extends ContentType = "text"> {
         create_time: null,
         update_time: null,
         content: makeContent<T>(contentType),
-        status: "in_progress",
+        status: "preprocessing",
         end_turn: null,
         metadata: {
           message_type: "next",

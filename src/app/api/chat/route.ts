@@ -19,10 +19,18 @@ const encoder = new TextEncoder();
 
 async function* makeCompletion(query: string) {
   const messager = new MessageManager(generateId(), "001", "text");
-  const results = await advanceQuery(query, "hybrid");
   const initChunk = messager.createInitSSEChunk();
   yield encoder.encode(formatSSEChunk(initChunk));
+  let firstToken = false;
+  const results = await advanceQuery(query, "hybrid");
   for await (const r of results) {
+    if (!firstToken) {
+      firstToken = true;
+      const chunk = messager.updateMessage((pack) => {
+        pack.message.status = "in_progress";
+      });
+      if (chunk) yield encoder.encode(formatSSEChunk(chunk));
+    }
     const chunk = messager.updateText(r.delta);
     if (chunk) yield encoder.encode(formatSSEChunk(chunk));
   }

@@ -47,7 +47,7 @@ export const ChatInput = ({
     else setStatus(Status.kIdle);
   }, [isLoading]);
   return (
-    <div className="border border-[#2f3133] flex rounded-lg bg-[#0c0e11] p-2 m-[1px] gap-2 items-center">
+    <div className="border border-[#2f3133] flex rounded-lg bg-[#0c0e11]/50 p-2 m-[1px] gap-2 items-center">
       {/* <div> */}
       {/* <Button */}
       {/*   onClick={handleMicButtonClick} */}

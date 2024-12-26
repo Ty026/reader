@@ -38,7 +38,7 @@ export interface Message {
 
   role: "system" | "user" | "assistant" | "data";
 
-  status: "in_progress" | "finished_successfully";
+  status: "in_progress" | "finished_successfully" | "preprocessing";
 }
 
 export type ChatRequest = {

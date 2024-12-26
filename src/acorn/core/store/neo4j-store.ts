@@ -1,15 +1,16 @@
 import neo4j, { Driver } from "neo4j-driver";
 import { trim } from "lodash";
 import type { GraphDB } from "./graph-db";
+import { env } from "@/acorn/utils/env";
 
 export class Neo4JStore<
   Node extends object = object,
   Edge extends object = object,
 > implements GraphDB<Node, Edge>
 {
-  uri = "neo4j://localhost:7687";
-  username = "neo4j";
-  password = "ty";
+  uri = env("NEO4J_URI");
+  username = env("NEO4J_USERNAME");
+  password = env("NEO4J_PASSWORD");
   _driver?: Driver;
   connected = false;
 

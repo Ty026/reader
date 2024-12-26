@@ -59,7 +59,7 @@ export async function processChatResponse({
         content: content ?? "",
         role: "assistant",
         createdAt: new Date(),
-        status: "in_progress",
+        status: "preprocessing",
       };
     }
     return currentMessage;
@@ -75,6 +75,7 @@ export async function processChatResponse({
         content: value.content.parts[0],
         status: value.status,
       };
+
       execUpdate();
     },
   });

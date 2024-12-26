@@ -1,6 +1,6 @@
 import { Completion } from "../core/completion/completion";
 import { keywordExtractPrompt } from "../core/prompts/keyword-extract-prompt";
-import { getCompletion } from "../setting/get-completion";
+// import { getCompletion } from "../setting/get-completion";
 import { getLogger } from "../setting/logger";
 
 export async function extractKeywordsFromQuery(query: string) {
@@ -12,7 +12,7 @@ export async function extractKeywordsFromQuery(query: string) {
   const completion = new Completion({
     model: "gpt-4o-mini",
     apiKey: process.env.OPENAI_API_KEY,
-    // baseURL: "https://zz.hao-ai.cn/v1",
+    baseURL: process.env.OPENAI_API_BASE_URL,
     chatOptions: {
       response_format: { type: "json_object" },
     },

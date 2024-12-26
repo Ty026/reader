@@ -1,3 +1,4 @@
+import { env } from "@/acorn/utils/env";
 import { fromPG } from "./from-pg";
 import { IsomorphicDB } from "./isomorphic-db";
 import type pg from "pg";
@@ -25,20 +26,17 @@ export abstract class PgStore {
     if (!this.db) {
       const pg = await import("pg");
       const { Client } = pg.default ?? pg;
-
       const client = new Client({
-        connectionString: "postgres://ty:ty@localhost:5432/rag",
+        connectionString: env("PG_CONN_STRING"),
       });
       await client.connect();
       this.connected = true;
-
       if (!this.vectorSupport) {
         // create vector extension if needed
         const { registerTypes } = await import("pgvector/pg");
         await client.query("CREATE EXTENSION IF NOT EXISTS vector");
         await registerTypes(client);
       }
-
       this.db = fromPG(client);
     }
     if (this.db && !this.connected) {

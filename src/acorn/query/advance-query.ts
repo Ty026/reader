@@ -139,7 +139,7 @@ export async function advanceQuery(
   } else {
     systemPrompt = ragPrompt.format({
       context: ctx,
-      response_type: "多段文本",
+      response_type: "简短段落",
       extra_data: overview,
     });
   }

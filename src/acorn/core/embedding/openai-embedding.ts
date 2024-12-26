@@ -100,6 +100,7 @@ export class OpenAIEmbedding extends Embedding {
       apiKey: this.apiKey,
       maxRetries: this.maxRetries,
       timeout: this.timeout!,
+      baseURL: env("OPENAI_API_BASE_URL"),
       ...this.options,
     });
   }

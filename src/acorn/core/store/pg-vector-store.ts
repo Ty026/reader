@@ -11,6 +11,7 @@ import {
 } from "./vector-db";
 import { fromPG } from "./from-pg";
 import { buildFilterClause, toPostgresCondition } from "./pg-utils";
+import { env } from "@/acorn/utils/env";
 
 type Params = {
   tableName: string;
@@ -21,7 +22,7 @@ type Params = {
 export class PgVectorStore implements VectorStore {
   embedModel?: Embedding;
   private db?: IsomorphicDB;
-  private connectionString = "postgres://ty:ty@localhost:5432/rag";
+  private connectionString = env("PG_CONN_STRING");
   private connected = false;
   private setupPerformed = false;
   private schemaName = "public";

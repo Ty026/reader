@@ -36,7 +36,7 @@ export async function processDataStream({
     recipient: "all",
     create_time: null,
     update_time: null,
-    status: "in_progress",
+    status: "preprocessing",
   });
   for await (const chunk of result) {
     builder.update(chunk.data);
