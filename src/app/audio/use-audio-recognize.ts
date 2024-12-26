@@ -2,22 +2,52 @@ import React from "react";
 
 type UseAudioRecognizeOptions = {
   url: string;
+  onConnectionReady?: () => void;
 };
 
-export const useAudioRecognize = ({ url }: UseAudioRecognizeOptions) => {
+enum ServerMessageType {
+  // successfully connected to the upstream service
+  kHello = "hello",
+
+  // ready to start recognizing
+  kReadyToRecognize = "ready_to_recognize",
+
+  // an complete sentence has been recognized
+  kSentenceDefinite = "sentence_definite",
+}
+
+type ServerPayload = {
+  type: ServerMessageType;
+} & {};
+
+export const useAudioRecognize = ({ url, onConnectionReady }: UseAudioRecognizeOptions) => {
+  const [feedable, setFeedable] = React.useState(false);
   const wsRef = React.useRef<WebSocket | null>(null);
+  const onMessage = (e: MessageEvent) => {
+    const payload = JSON.parse(e.data) as ServerPayload;
+    switch (payload.type) {
+      case ServerMessageType.kHello:
+        onConnectionReady?.();
+        break;
+      case ServerMessageType.kReadyToRecognize:
+        console.info("ok, we can feed the samples to recognizer");
+        setFeedable(true);
+        break;
+      case ServerMessageType.kSentenceDefinite:
+        console.info(payload);
+        setFeedable(false);
+        break;
+    }
+  };
   const [connected, setConnected] = React.useState(false);
   const connect = React.useCallback(() => {
     if (wsRef.current) return;
     const conn = new WebSocket(url);
     wsRef.current = conn;
     conn.onopen = () => {
-      console.log("open");
       setConnected(true);
     };
-    conn.onmessage = (e) => {
-      console.log("message", e.data);
-    };
+    conn.onmessage = (e) => onMessage(e);
     conn.onclose = () => {
       wsRef.current = null;
       setConnected(false);
@@ -26,18 +56,20 @@ export const useAudioRecognize = ({ url }: UseAudioRecognizeOptions) => {
   const close = React.useCallback(() => {
     wsRef.current?.close();
   }, []);
-  const send = React.useCallback(
-    (data: string | ArrayBufferLike | ArrayBufferView) => {
-      if (!wsRef.current) return;
-      console.log("send", data);
-      wsRef.current.send(data);
-    },
-    [],
-  );
+  const send = React.useCallback((data: string | ArrayBufferLike | ArrayBufferView) => {
+    if (!wsRef.current) return;
+    wsRef.current.send(data);
+  }, []);
+
+  const startRecognizing = React.useCallback(() => {
+    send(JSON.stringify({ type: "start" }));
+  }, []);
   return {
     connect,
     connected,
     close,
     send,
+    startRecognizing,
+    feedable,
   };
 };

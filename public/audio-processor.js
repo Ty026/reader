@@ -1,41 +1,57 @@
+// audio-processor.js
 class AudioProcessor extends AudioWorkletProcessor {
   constructor() {
     super();
-    this.buffer = new Float32Array();
-    this.isVoiceActive = false;
     this.isRecording = true;
-    this.port.onmessage = (e) => {
-      if (e.data === "GET_DATA") {
-        this.port.postMessage(this.buffer);
-        this.port.postMessage("END_DATA");
-      } else if (e.data === "STOP_DATA") {
-        this.isRecording = false;
-      }
-    };
+    this.isVoiceActive = false;
+    this.sampleBuffer = new Float32Array();
+    this.bufferSize = 4096 * 3; // 每次发送的采样大小
   }
 
   process(inputs, outputs) {
     if (!this.isRecording) return false;
+
     const input = inputs[0];
     if (input && input.length > 0) {
       const monoInput = input[0];
-      const temp = new Float32Array(this.buffer.length + monoInput.length);
-      temp.set(this.buffer);
-      temp.set(monoInput, this.buffer.length);
-      this.buffer = temp;
-      const rms = calculateRMS(monoInput);
+
+      // 将新的采样数据追加到缓冲区
+      const newBuffer = new Float32Array(this.sampleBuffer.length + monoInput.length);
+      newBuffer.set(this.sampleBuffer);
+      newBuffer.set(monoInput, this.sampleBuffer.length);
+      this.sampleBuffer = newBuffer;
+
+      // 当累积的样本足够时，发送数据
+      if (this.sampleBuffer.length >= this.bufferSize) {
+        // 发送音频数据
+        this.port.postMessage({
+          audioData: this.sampleBuffer,
+        });
+
+        // 清空缓冲区
+        this.sampleBuffer = new Float32Array();
+      }
+
+      // 检测声音活动
+      const rms = this.calculateRMS(monoInput);
+      const wasActive = this.isVoiceActive;
       this.isVoiceActive = rms > 0.03;
-      this.port.postMessage({ isVoiceActive: this.isVoiceActive });
+
+      if (wasActive !== this.isVoiceActive) {
+        this.port.postMessage({ isVoiceActive: this.isVoiceActive });
+      }
     }
+
     return true;
   }
-}
-const calculateRMS = (data) => {
-  let rms = 0;
-  for (let i = 0; i < data.length; i++) {
-    rms += data[i] * data[i];
+
+  calculateRMS(data) {
+    let sum = 0;
+    for (let i = 0; i < data.length; i++) {
+      sum += data[i] * data[i];
+    }
+    return Math.sqrt(sum / data.length);
   }
-  rms = Math.sqrt(rms / data.length);
-  return rms;
-};
+}
+
 registerProcessor("audio-processor", AudioProcessor);
