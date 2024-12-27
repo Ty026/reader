@@ -69,14 +69,16 @@ export const useRecording = ({ onSample }: UseRecorderParams) => {
         isError: false,
         errorMessage: "",
       }));
+      return true;
     } catch (err) {
-      console.error(err);
+      console.log(err);
       setState((prev) => ({
         ...prev,
         isError: true,
         errorMessage: "Failed to start recording",
         isRecording: false,
       }));
+      return false;
     }
   }, [setState]);
 

@@ -1,12 +1,6 @@
 import React from "react";
 import { useId } from "react";
-import type {
-  ChatRequest,
-  ChatRequestOptions,
-  JSONValue,
-  Message,
-  UseChatOptions,
-} from "./types";
+import type { ChatRequest, ChatRequestOptions, JSONValue, Message, UseChatOptions } from "./types";
 
 import { generateId as generateIdFn } from "./generate-id";
 import useSWR, { KeyedMutator } from "swr";
@@ -32,29 +26,20 @@ export const useChat = ({
   const chatKey = typeof idKey === "string" ? [api, idKey] : idKey;
 
   const [initialMessagesFallback] = React.useState<Message[]>([]);
-  const { data: messages, mutate } = useSWR<Message[]>(
-    [chatKey, "messages"],
-    null,
-    { fallbackData: initialMessages ?? initialMessagesFallback },
-  );
+  const { data: messages, mutate } = useSWR<Message[]>([chatKey, "messages"], null, {
+    fallbackData: initialMessages ?? initialMessagesFallback,
+  });
   // keep the latest messages in a ref
   const messagesRef = React.useRef<Message[]>(messages || []);
   React.useEffect(() => {
     messagesRef.current = messages || [];
   }, [messages]);
 
-  const { data: isLoading = false, mutate: mutateLoading } = useSWR<boolean>(
-    [chatKey, "loading"],
-    null,
-  );
+  const { data: isLoading = false, mutate: mutateLoading } = useSWR<boolean>([chatKey, "loading"], null);
 
-  const { data: error = undefined, mutate: setError } = useSWR<
-    undefined | Error
-  >([chatKey, "error"], null);
+  const { data: error = undefined, mutate: setError } = useSWR<undefined | Error>([chatKey, "error"], null);
 
-  const { data: streamData, mutate: mutateStreamData } = useSWR<
-    JSONValue[] | undefined
-  >([chatKey, "streamData"], null);
+  const { data: streamData, mutate: mutateStreamData } = useSWR<JSONValue[] | undefined>([chatKey, "streamData"], null);
   const streamDataRef = React.useRef<JSONValue[] | undefined>(streamData);
   React.useEffect(() => {
     streamDataRef.current = streamData;
@@ -131,12 +116,10 @@ export const useChat = ({
   );
 
   const handleSubmit = React.useCallback(
-    async (
-      event?: { preventDefault: () => void },
-      options: ChatRequestOptions = {},
-    ) => {
+    async (event?: { preventDefault: () => void }, options: ChatRequestOptions = {}) => {
       event?.preventDefault?.();
       if (!input) return;
+      console.log(input);
       const messages = messagesRef.current.concat({
         id: generateId(),
         createdAt: new Date(),

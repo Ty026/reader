@@ -5,15 +5,10 @@ import { useChat } from "./demo/use-chat";
 import { kGuideLineMessage } from "./demo/guideline-message";
 import { MessageCard } from "./demo/message-card";
 import { useToast } from "@/hooks/use-toast";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { throttle } from "lodash";
 import Image from "next/image";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { CopyX } from "lucide-react";
 
@@ -26,12 +21,12 @@ const defaultQuestions = [
   "今世缘如何在营销和传播上构建品牌价值？",
 ];
 
-const initialInput =
-  defaultQuestions[Math.floor(Math.random() * defaultQuestions.length)];
+const initialInput = defaultQuestions[Math.floor(Math.random() * defaultQuestions.length)];
 
 export default function HomePage() {
   const { toast } = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
+  let [seq, setSeq] = useState(0);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -62,6 +57,9 @@ export default function HomePage() {
         description: "连接大模型失败，请稍后重试",
       });
     },
+    onFinish: () => {
+      setSeq((s) => s + 1);
+    },
   });
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -70,9 +68,7 @@ export default function HomePage() {
     document.documentElement.addEventListener(
       "click",
       () => {
-        if (videoRef.current?.paused) {
-          videoRef.current?.play();
-        }
+        if (videoRef.current?.paused) videoRef.current?.play();
       },
       false,
     );
@@ -127,16 +123,11 @@ export default function HomePage() {
                 <CopyX size={6} strokeWidth={2} aria-hidden="true" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent className="px-2 py-1 text-xs">
-              清空聊天记录
-            </TooltipContent>
+            <TooltipContent className="px-2 py-1 text-xs">清空聊天记录</TooltipContent>
           </Tooltip>
         </TooltipProvider>
       </div>
-      <div
-        className="flex-1 overflow-y-auto mt-[350px] z-2 relative"
-        ref={containerRef}
-      >
+      <div className="flex-1 overflow-y-auto mt-[350px] z-2 relative" ref={containerRef}>
         <div className="h-auto">
           {chat.messages.map((item) => (
             <MessageCard key={item.id} message={item} />
@@ -151,6 +142,8 @@ export default function HomePage() {
           input={chat.input}
           onSubmit={chat.handleSubmit}
           onStop={chat.stop}
+          seq={seq}
+          setInput={chat.setInput}
         />
       </div>
     </div>

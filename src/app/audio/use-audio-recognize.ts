@@ -3,6 +3,7 @@ import React from "react";
 type UseAudioRecognizeOptions = {
   url: string;
   onConnectionReady?: () => void;
+  onRecognized?: (text: string) => void;
 };
 
 enum ServerMessageType {
@@ -18,9 +19,10 @@ enum ServerMessageType {
 
 type ServerPayload = {
   type: ServerMessageType;
+  sentence: string;
 } & {};
 
-export const useAudioRecognize = ({ url, onConnectionReady }: UseAudioRecognizeOptions) => {
+export const useAudioRecognize = ({ url, onConnectionReady, onRecognized }: UseAudioRecognizeOptions) => {
   const [feedable, setFeedable] = React.useState(false);
   const wsRef = React.useRef<WebSocket | null>(null);
   const onMessage = (e: MessageEvent) => {
@@ -34,8 +36,8 @@ export const useAudioRecognize = ({ url, onConnectionReady }: UseAudioRecognizeO
         setFeedable(true);
         break;
       case ServerMessageType.kSentenceDefinite:
-        console.info(payload);
         setFeedable(false);
+        onRecognized?.(payload.sentence);
         break;
     }
   };
@@ -55,6 +57,8 @@ export const useAudioRecognize = ({ url, onConnectionReady }: UseAudioRecognizeO
   }, []);
   const close = React.useCallback(() => {
     wsRef.current?.close();
+    setFeedable(false);
+    setConnected(false);
   }, []);
   const send = React.useCallback((data: string | ArrayBufferLike | ArrayBufferView) => {
     if (!wsRef.current) return;
