@@ -24,6 +24,7 @@ type ServerPayload = {
 
 export const useAudioRecognize = ({ url, onConnectionReady, onRecognized }: UseAudioRecognizeOptions) => {
   const [feedable, setFeedable] = React.useState(false);
+  const [connecting, setConnecting] = React.useState(false);
   const wsRef = React.useRef<WebSocket | null>(null);
   const onMessage = (e: MessageEvent) => {
     const payload = JSON.parse(e.data) as ServerPayload;
@@ -45,8 +46,10 @@ export const useAudioRecognize = ({ url, onConnectionReady, onRecognized }: UseA
   const connect = React.useCallback(() => {
     if (wsRef.current) return;
     const conn = new WebSocket(url);
+    setConnecting(true);
     wsRef.current = conn;
     conn.onopen = () => {
+      setConnecting(false);
       setConnected(true);
     };
     conn.onmessage = (e) => onMessage(e);
@@ -75,5 +78,6 @@ export const useAudioRecognize = ({ url, onConnectionReady, onRecognized }: UseA
     send,
     startRecognizing,
     feedable,
+    connecting,
   };
 };
