@@ -1,0 +1,11 @@
+services:
+  ragapp:
+    image: crpi-co9kwukn9e0489ft.cn-hangzhou.personal.cr.aliyuncs.com/physic/ragapp
+    container_name: ragapp
+    ports:
+      - "30200:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    volumes:
+      - .env:/app/.env

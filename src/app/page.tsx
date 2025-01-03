@@ -1,13 +1,12 @@
 "use client";
 
-import { ChatInput } from "@/components/chat/chat-input";
+import { ChatInput, InputInterface } from "@/components/chat/chat-input";
 import { useChat } from "./demo/use-chat";
 import { kGuideLineMessage } from "./demo/guideline-message";
 import { MessageCard } from "./demo/message-card";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useRef, useState } from "react";
 import { throttle } from "lodash";
-import Image from "next/image";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { CopyX } from "lucide-react";
@@ -26,7 +25,7 @@ const initialInput = defaultQuestions[Math.floor(Math.random() * defaultQuestion
 export default function HomePage() {
   const { toast } = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
-  let [seq, setSeq] = useState(0);
+  const inputRef = useRef<InputInterface>(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -58,7 +57,9 @@ export default function HomePage() {
       });
     },
     onFinish: () => {
-      setSeq((s) => s + 1);
+      setTimeout(() => {
+        inputRef.current?.listen();
+      }, 100);
     },
   });
 
@@ -137,12 +138,12 @@ export default function HomePage() {
       </div>
       <div className="p-2 flex-shrink-0 mb-5 z-2 relative">
         <ChatInput
+          ref={inputRef}
           isLoading={chat.isLoading}
           onInputChange={chat.handleInputChange}
           input={chat.input}
           onSubmit={chat.handleSubmit}
           onStop={chat.stop}
-          seq={seq}
           setInput={chat.setInput}
         />
       </div>

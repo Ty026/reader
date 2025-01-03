@@ -12,8 +12,9 @@ export enum ASR {
 
 export const useASR = ({ onRecognized }: { onRecognized?: (sentence: string) => void }) => {
   const [error, setError] = useState("");
+
   const { connected, connecting, send, connect, startRecognizing, feedable } = useAudioRecognize({
-    url: "ws://localhost:8083",
+    url: process.env.NEXT_PUBLIC_ASR_URL ?? "wss://qg.hao-ai.cn:3500",
     onConnectionReady: () => {
       startRecognizing();
     },
@@ -44,8 +45,14 @@ export const useASR = ({ onRecognized }: { onRecognized?: (sentence: string) => 
       connect();
     } else {
       startRecognizing();
+      setStatus(ASR.kListening);
     }
   }, [recorder.isRecording, connecting]);
+
+  const stop = React.useCallback(() => {
+    recorder.stop();
+    setStatus(ASR.kIdle);
+  }, [recorder]);
 
   useEffect(() => {
     if (feedable) setStatus(ASR.kListening);
@@ -59,5 +66,6 @@ export const useASR = ({ onRecognized }: { onRecognized?: (sentence: string) => 
     voiceActive,
     status,
     error,
+    stop,
   };
 };

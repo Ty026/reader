@@ -3,8 +3,6 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import React, { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { useRecording } from "@/app/audio/use-recording";
-import { useAudioRecognize } from "@/app/audio/use-audio-recognize";
 import { ASR, useASR } from "./use-asr";
 
 enum Status {
@@ -14,25 +12,31 @@ enum Status {
   kListening = "listening",
 }
 
-export const ChatInput = ({
-  input,
-  onSubmit,
-  onInputChange,
-  onStop,
-  isLoading,
-  setInput,
-  seq,
-}: {
-  input: string;
-  onSubmit: (e: any) => void;
-  onInputChange: (e: any) => void;
-  onStop?: () => void;
-  setInput?: (text: string) => void;
-  isLoading: boolean;
-  seq: number;
-}) => {
+export type InputInterface = {
+  listen: () => void;
+};
+
+const ChatInputImpl = (
+  {
+    input,
+    onSubmit,
+    onInputChange,
+    onStop,
+    isLoading,
+    setInput,
+  }: {
+    input: string;
+    onSubmit: (e: any) => void;
+    onInputChange: (e: any) => void;
+    onStop?: () => void;
+    setInput?: (text: string) => void;
+    isLoading: boolean;
+  },
+  ref: React.ForwardedRef<InputInterface>,
+) => {
   const [status, setStatus] = React.useState<Status>(Status.kIdle);
   const showLoading = status === Status.kLoading || status === Status.kGenerating;
+  const [isMicRequested, setIsMicRequested] = useState(false);
   const handleOnSend = () => {
     if (!isLoading) {
       formRef.current?.requestSubmit();
@@ -47,17 +51,29 @@ export const ChatInput = ({
 
   const formRef = useRef<HTMLFormElement>(null);
 
-  const asr = useASR({});
+  const asr = useASR({
+    onRecognized: (sentence) => {
+      setInput?.(sentence);
+      setTimeout(() => {
+        formRef.current?.requestSubmit();
+      }, 10);
+    },
+  });
 
   const handleMicButtonClick = async () => {
     switch (asr.status) {
       case ASR.kIdle:
+        setIsMicRequested(true);
         asr.start();
         break;
 
       case ASR.kUnListening: {
         asr.start();
         break;
+      }
+      case ASR.kListening: {
+        setIsMicRequested(false);
+        asr.stop();
       }
     }
   };
@@ -66,15 +82,21 @@ export const ChatInput = ({
     return status.includes(asr.status);
   };
 
+  React.useImperativeHandle(ref, () => ({
+    listen() {
+      if (isMicRequested) asr.start();
+    },
+  }));
+
   return (
     <div className="border border-[#2f3133] flex rounded-lg bg-[#0c0e11]/50 p-2 m-[1px] gap-2 items-center">
-      <div>{asr.status}</div>
       <div>
         <Button
           onClick={handleMicButtonClick}
           className={cn(
-            "rounded-full",
+            "rounded-full voice-indicator",
             "w-8 h-8",
+            asr.voiceActive && "active",
             matchStatus(ASR.kListening, ASR.kUnListening) && "bg-red-500 hover:bg-red-500",
           )}
           variant="outline"
@@ -106,3 +128,5 @@ export const ChatInput = ({
     </div>
   );
 };
+
+export const ChatInput = React.forwardRef(ChatInputImpl);

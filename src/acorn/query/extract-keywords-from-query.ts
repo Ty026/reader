@@ -1,6 +1,6 @@
 import { Completion } from "../core/completion/completion";
 import { keywordExtractPrompt } from "../core/prompts/keyword-extract-prompt";
-// import { getCompletion } from "../setting/get-completion";
+import { getCompletion } from "../setting/get-completion";
 import { getLogger } from "../setting/logger";
 
 export async function extractKeywordsFromQuery(query: string) {
